@@ -1,4 +1,4 @@
-import type { Metadata, Viewport } from 'next';
+import type { Viewport } from 'next';
 import Link from 'next/link';
 import './globals.css';
 import { Header } from '@/components/Header';
@@ -14,13 +14,9 @@ import { NetworkGuard } from '@/components/wallet/NetworkGuard';
 import ServiceWorkerRegister from '@/components/ServiceWorkerRegister';
 import OfflineIndicator from '@/components/OfflineIndicator';
 import { site, explorerUrl, apiDocsUrl } from '@/lib/site';
+import { rootMetadata } from '@/lib/metadata';
 
-export const metadata: Metadata = {
-  title: { default: 'TalentTrust | Milestone escrow on Stellar', template: '%s | TalentTrust' },
-  description:
-    'TalentTrust lets clients and freelancers lock payments in a Soroban smart contract, release funds milestone by milestone, resolve disputes and build on-chain reputation.',
-  icons: { icon: '/icon.svg' },
-};
+export const metadata = rootMetadata;
 
 export const viewport: Viewport = {
   width: 'device-width',
