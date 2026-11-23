@@ -118,4 +118,25 @@ describe('StatementPage', () => {
     const css = readFileSync('src/app/globals.css', 'utf8');
     expect(css).toMatch(/@media print\s*\{[^}]*\.statement-toolbar[^}]*display:\s*none\s*!important/);
   });
+
+  it.each([undefined, 'invalid-date'])('handles missing or invalid statement dates (%s)', async (date) => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(json({ data: contract({ createdAt: date, updatedAt: date }) })));
+    await renderPage('7');
+    expect(screen.getAllByText('—')).toHaveLength(2);
+  });
+
+  it('renders an empty zero-budget ledger without a mismatch', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(json({ data: contract({ totalAmount: 0, fundedAmount: 0, releasedAmount: 0, milestones: [] }) })));
+    await renderPage('7');
+    expect(screen.getByText('No payouts recorded yet.')).toBeInTheDocument();
+    expect(screen.queryByRole('alert')).toBeNull();
+  });
+
+  it.each([null, '2026-02-01T09:00:00.000Z'])('renders dispute metadata with optional resolution time (%s)', async (resolvedAt) => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(json({ data: contract({ status: 'Resolved', releasedAmount: 0, milestones: [], dispute: { raisedBy: 'GSYNTHETIC', reason: 'scope', freelancerBps: 5000, resolvedAt } }) })));
+    await renderPage('7');
+    expect(screen.getByText('Dispute raised by')).toBeInTheDocument();
+    expect(screen.getByText('GSYNTHETIC')).toBeInTheDocument();
+    expect(Boolean(screen.queryByText('Dispute resolved'))).toBe(Boolean(resolvedAt));
+  });
 });
